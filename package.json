@@ -1,0 +1,87 @@
+{
+  "name": "express-ws",
+  "version": "1.0.0",
+  "description": "tdd with express",
+  "main": "app.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=staging npm run migrate && cross-env NODE_ENV=development nodemon index",
+    "start": "cross-env NODE_ENV=production npm run migrate && cross-env NODE_ENV=production node index",
+    "test": "cross-env NODE_ENV=test jest --watch",
+    "cleanup": "node test-cleanup",
+    "posttest": "cross-env NODE_ENV=test npm run cleanup",
+    "lint": "eslint .",
+    "test:staging": "cross-env NODE_ENV=staging jest --all  --runInBand --forceExit",
+    "migrate": "npx sequelize-cli db:migrate",
+    "pretest:staging": "cross-env NODE_ENV=staging npm run migrate",
+    "posttest:staging": "cross-env NODE_ENV=staging npm run cleanup",
+    "seed": "cross-env NODE_ENV=staging npx sequelize-cli db:seed:all",
+    "predebug": "npm run migrate",
+    "debug": "cross-env NODE_ENV=staging jest --runTestsByPath test/PasswordReset.spec.js"
+  },
+  "author": "Samuel Ireke",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "config": "^3.3.9",
+    "crypto": "^1.0.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "file-type": "^16.5.3",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^4.7.0",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.32.1",
+    "sequelize-cli": "^6.6.1",
+    "sqlite3": "^5.1.6",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.6.4",
+    "jest-watch-typeahead": "^2.2.2",
+    "nodemailer-stub": "^1.2.2",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
+    "smtp-server": "^3.13.0",
+    "supertest": "^6.3.3"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 7
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:prettier/recommended"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "env": {
+      "node": true,
+      "es7": true,
+      "jest": false
+    },
+    "rules": {
+      "eqeqeq": "warn",
+      "comma-dangle": "off",
+      "prettier/prettier": "warn"
+    }
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "jest": {
+    "watchPlugins": [
+      "jest-watch-typeahead/filename",
+      "jest-watch-typeahead/testname"
+    ],
+    "testPathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/config/"
+    ]
+  }
+}

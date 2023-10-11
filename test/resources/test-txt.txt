@@ -1,0 +1,330 @@
+with a as
+(
+SELECT TASK_NAME,QUEUE_NAME,PLOTS_PROJECT_ID as PROJ_ID,
+CONGO_NSI
+
+FROM mtm.FTTP_NEWSITES_TASKS
+WHERE QUEUE_NAME IN
+(
+'RST_BRISTOL_WILTSHIRE_DORSET','RST_CENTRAL',
+'RST_CHILTERNS','RST_EAST','RST_EAST_SCOTLAND',
+'RST_HAMPSHIRE_BERKSHIRE',
+'RST_LANCS_CUMBRIA','RST_LONDON_CENTRAL',
+'RST_LONDON_NORTH_EAST','RST_LONDON_NORTH_WEST',
+'RST_LONDON_SOUTH','RST_MANCHESTER',
+'RST_MERSEYSIDE_CHESHIRE','RST_MID_NORTH_WALES',
+'RST_NORFOLK_LINCS_EAST_MIDLANDS','RST_NORTH',
+'RST_NORTHUMBERLAND_DURHAM','RST_SD_HI',
+'RST_SOUTH','RST_SOUTH_ANGLIA',
+'RST_SOUTH_EAST','RST_SOUTH_WALES',
+'RST_THE_MARCHES','RST_WEST',
+'RST_WEST_COUNTRY','RST_WEST_MIDS_STAFFS',
+'RST_WEST_SCOTLAND','RST_YORKSHIRE'
+)
+AND TASK_NAME LIKE 'ONT%'
+AND TRUNC(DATALAB_UPDATE_DATE) = TRUNC(SYSDATE) AND STATUS = 'In Progress'
+)
+
+, b as
+(
+Select * from A where task_name LIKE '%Huawei%'
+
+)
+
+, c as
+
+(
+
+Select * from A where task_name LIKE  '%NOKIA%'
+)
+,k as
+(
+Select * from A where task_name NOT LIKE '%Huawei%' AND task_name NOT LIKE '%NOKIA%'
+)
+
+
+, D as
+(
+
+SELECT TASK_NAME,
+SUBSTR(RD, 0, LENGTH(RD) - 7)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM
+(
+Select TASK_NAME,
+SUBSTR(TASK_NAME, 43, LENGTH(TASK_NAME) - 7)AS RD,
+
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+from B
+where task_name LIKE '%ONT Not In Sync Estimate Closed Exception%'
+)
+)
+, E as
+(
+SELECT TASK_NAME,
+SUBSTR(RD, 0, LENGTH(RD) - 7)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM
+(
+Select TASK_NAME,
+SUBSTR(TASK_NAME, 27, LENGTH(TASK_NAME) - 7)AS RD,
+
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+
+from B
+
+where task_name like '%ONT Not In Sync Exception%'
+)
+)
+
+, F as
+(
+SELECT TASK_NAME,
+SUBSTR(RD, 0, LENGTH(RD) - 6)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM
+(
+
+Select TASK_NAME,
+SUBSTR(TASK_NAME, 43, LENGTH(TASK_NAME) - 6)AS rd,
+
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+
+from C
+
+where task_name LIKE '%ONT Not In Sync Estimate Closed Exception%'
+
+)
+)
+, G as
+(
+SELECT TASK_NAME,
+SUBSTR(RD, 0, LENGTH(RD) - 6)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM
+(
+Select TASK_NAME,
+SUBSTR(TASK_NAME, 27, LENGTH(TASK_NAME) - 6)AS RD,
+
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+
+from C
+
+where task_name like '%ONT Not In Sync Exception%'
+)
+)
+,L as
+(
+
+SELECT TASK_NAME,
+SUBSTR(TASK_NAME, 43, LENGTH(TASK_NAME) - 7)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM k
+
+where task_name LIKE '%ONT Not In Sync Estimate Closed Exception%'
+
+)
+
+,m as
+(
+SELECT TASK_NAME,
+SUBSTR(TASK_NAME, 27, LENGTH(TASK_NAME) - 7)AS CSPID,
+QUEUE_NAME, PROJ_ID, CONGO_NSI
+FROM k
+where task_name like '%ONT Not In Sync Exception%'
+)
+
+,h as
+(
+Select * from D
+UNION ALL
+Select * from E
+UNION ALL
+Select * from F
+UNION ALL
+Select * from G
+UNION ALL
+select * from L
+UNION ALL
+select * from m
+)
+, I as
+(
+
+Select * from
+(
+select 
+
+H.TASK_NAME,
+H.CSPID,
+H.QUEUE_NAME,
+H.PROJ_ID,
+H.CONGO_NSI,
+Z.Site,
+Z.OM,
+Z.GM,
+
+Z.REGION,
+Z.WORK_FORCE,
+Z.FBC_NAME,
+Z.PM_NAME,
+CONCAT(PLOT_NUMBER,SITE) AS ADDRESS,
+Y.SUB_PLOT_NUMBER,
+Z.PLOT_ESTIMATE,
+Z.PLOT_EST_STATUS,
+Z.PLOT_EST_CLOSE,
+z.PLOT_STATUS,
+W.WEEK_END_DATE_WED AS WEEK_END,
+X.WORKING_DAY_COUNT - W.WORKING_DAY_COUNT AS DWELL,
+Z.ONT_SERIAL_NUMBER
+from H
+left JOIN
+(
+select 
+OM,
+GM,
+REGION,
+WORK_FORCE,
+FBC_NAME,
+PM_NAME,
+CSPID,
+PLOT_NUMBER,SITE,
+PLOT_ESTIMATE,
+PLOT_EST_STATUS,
+PLOT_EST_CLOSE,
+PLOT_STATUS,
+ONT_SERIAL_NUMBER 
+from
+ND_insight.ns_daily_plot_fact
+
+)
+Z
+
+ON H.CSPID = Z.CSPID
+
+LEFT JOIN
+
+(
+select distinct cspid, sub_plot_number
+from mtm.fttp_newsites_plots
+where sub_plot_number is not null 
+)
+Y
+
+ON H.CSPID = Y.CSPID
+
+
+left join
+BI_MANAGED.REF_WORKING_DAYS W 
+  
+ON TRUNC(Z.PLOT_EST_CLOSE) = W.DATADATE 
+                        
+LEFT JOIN
+BI_MANAGED.REF_WORKING_DAYS X 
+
+ON TRUNC(SYSDATE) = TRUNC(X.DATADATE) 
+)
+where PLOT_STATUS is not null
+
+)
+
+, j as
+(
+
+    select
+    si.case_id
+    , coalesce( sa.csp_id
+    , case
+    when regexp_like(circuit_id, 'R[A-Z]{6}$', 'c') then regexp_substr(circuit_id, 'R[A-Z]{6}$', 1, 1, 'c')
+    when regexp_like(order_id, 'R[A-Z]{6}$', 'c') then regexp_substr(circuit_id, 'R[A-Z]{6}$', 1, 1, 'c')
+    when regexp_like(css_reference, 'R[A-Z]{6}$', 'c') then regexp_substr(circuit_id, 'R[A-Z]{6}$', 1, 1, 'c')
+    end
+    ) as cspid
+    , si.issue_dt
+    from
+    isd_drv.si_case  si
+    left join isd_drv.v_si_attr_nsi sa
+    on si.case_id = sa.case_id
+    where
+    si.case_type in ( 'FTTP Newsite','EU Newsites','Developer Newsite')
+    and si.open_category not in ('Newsites Copper','FTTP Newsite - Pre Order - NI','FTTP Newsite - NI')
+    and si.product_code in ('FTTP','0')
+    and si.status = 'Open'
+    )
+SELECT 
+
+TASK_NAME,
+CSPID,
+QUEUE_NAME,
+PROJ_ID,
+CONGO_NSI,
+Site,
+OM,
+GM,
+REGION,
+Associated_DSO_Case_ID,
+WORK_FORCE,
+FBC_NAME,
+PM_NAME,
+ADDRESS,
+SUB_PLOT_NUMBER,
+PLOT_ESTIMATE,
+PLOT_EST_STATUS,
+PLOT_EST_CLOSE,
+WEEK_END, 
+DWELL,
+STATUS,
+SYNCSTATUS,
+NAD_KEY,
+ONT_SN,
+RELATIVE_NAME,
+EMSRELATIVENAME,
+AUTODISCOVERRELATIVENAME
+
+
+FROM
+(
+SELECT 
+
+I.TASK_NAME,I.CSPID,I.QUEUE_NAME,I.PROJ_ID,
+I.CONGO_NSI,I.Site,I.OM,I.GM,I.REGION,
+J.CASE_ID AS Associated_DSO_Case_ID,
+I.WORK_FORCE,I.FBC_NAME,
+I.PM_NAME,I.ADDRESS,I.SUB_PLOT_NUMBER,
+I.PLOT_ESTIMATE,I.PLOT_EST_STATUS,
+I.PLOT_EST_CLOSE,I.WEEK_END, 
+I.DWELL,
+CASE
+WHEN I.DWELL BETWEEN 0 AND 2 THEN '0-2 Days'
+WHEN I.DWELL BETWEEN 3 AND 5 THEN '3-5 Days'
+WHEN I.DWELL BETWEEN 6 AND 10 THEN '6-10 Days'
+WHEN I.DWELL BETWEEN 11 AND 20 THEN '11-20 Days'
+WHEN I.DWELL >20 THEN '> 20 Days'
+
+ELSE 'Still Status K'
+END AS STATUS,
+
+S.SYNCSTATUS,S.NAD_KEY,S.ONT_SN,S.RELATIVE_NAME,
+S.EMSRELATIVENAME,S.AUTODISCOVERRELATIVENAME,
+row_number () over (partition by i.CSPID order by PLOT_EST_CLOSE asc) as row_num
+FROM I
+
+LEFT JOIN 
+
+id_bi.onestopshop_snap S 
+
+ON I.CSPID = S.CSPID
+
+LEFT JOIN
+
+BASS.NS_TT_WORKSTACK R
+
+ON I.CSPID  = R.CSP
+
+left join 
+
+J
+
+ON I.CSPID = J.CSPID
+)
+WHERE ROW_NUM = 1
