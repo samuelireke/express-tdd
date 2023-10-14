@@ -3,6 +3,8 @@ node_modules
 *.sqlite
 
 #Logs
-
 *.logs
 logs
+
+#ssh directories
+ssh/
