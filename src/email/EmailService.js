@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
-
 const transporter = require('../config/emailTransporter');
+const logger = require('../shared/logger');
 
 const sendAccountActivation = async (email, token) => {
   const info = await transporter.sendMail({
@@ -14,9 +14,7 @@ const sendAccountActivation = async (email, token) => {
       <div>Token is ${token} </div>
       `,
   });
-  if (process.env.NODE_ENV === 'development') {
-    console.log('url: ', nodemailer.getTestMessageUrl(info));
-  }
+  logger.info('url: ', nodemailer.getTestMessageUrl(info));
 };
 
 const sendPasswordReset = async (email, token) => {
@@ -33,9 +31,7 @@ const sendPasswordReset = async (email, token) => {
       `,
     // client PORT => 8080
   });
-  if (process.env.NODE_ENV === 'development') {
-    console.log('url: ', nodemailer.getTestMessageUrl(info));
-  }
+  logger.info('url: ', nodemailer.getTestMessageUrl(info));
 };
 
 module.exports = { sendAccountActivation, sendPasswordReset };
