@@ -9,8 +9,7 @@ async function startServer() {
   // cleanup expired tokens
   await TokenService.scheduledCleanup();
   // Start app
-  app.listen(3000, () => {
-    logger.info('App started on port 3000');
+  app.listen(process.env.PORT || 3000, () => {
     logger.info('App running version ' + process.env.npm_package_version);
   });
 }
