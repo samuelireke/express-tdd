@@ -34,7 +34,7 @@ jobs:
       with:
         key: ${{secrets.GOOGLE_CLOUD_VM_SSH}}
         host: ${{secrets.GOOGLE_CLOUD_VM_IP}}
-        username: ${{GOOGLE_CLOUD_VM_USERNAME}}
+        username: ${{secrets.GOOGLE_CLOUD_VM_USERNAME}}
         script: |
           pm2 delete all
           cd /var/app/express-tdd
