@@ -4,7 +4,7 @@
   "description": "tdd with express",
   "main": "app.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=staging npm run migrate && cross-env NODE_ENV=development nodemon index",
+    "dev": "cross-env NODE_ENV=development npm run migrate && cross-env NODE_ENV=development nodemon index",
     "start": "cross-env NODE_ENV=production npm run migrate && cross-env NODE_ENV=production node index",
     "test": "cross-env NODE_ENV=test jest --watch",
     "cleanup": "node test-cleanup",

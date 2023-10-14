@@ -22,4 +22,4 @@ const logger = createLogger({
   silent: process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'staging',
 });
 
-module.expots = logger;
+module.exports = logger;
