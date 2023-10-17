@@ -3,7 +3,7 @@ const { combine, timestamp, colorize, errors, printf } = format;
 
 const devLogger = () => {
   const customFormat = combine(
-    colorize(),
+    colorize({ all: true }),
     timestamp(),
     errors({ stack: true }),
     printf((info) => {
