@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const transporter = require('../config/emailTransporter');
-const logger = require('../shared/logger');
+const logger = require('../logger');
 
 const sendAccountActivation = async (email, token) => {
   const info = await transporter.sendMail({
