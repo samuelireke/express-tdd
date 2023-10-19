@@ -29,8 +29,8 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: npm run test:staging
-    - name: SSH Remote Commands
-      uses: appleboy/ssh-action@v1.0.0
+    # - name: SSH Remote Commands
+    #   uses: appleboy/ssh-action@v1.0.0
       # with:
       #   key: ${{secrets.GOOGLE_CLOUD_VM_SSH}}
       #   host: ${{secrets.GOOGLE_CLOUD_VM_IP}}
